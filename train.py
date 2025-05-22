@@ -18,7 +18,7 @@ from torch.optim.lr_scheduler import LambdaLR
 from torch.utils.data import DistributedSampler
 
 from model.loader import DatasetLoader
-from model.trans4map import Trans4map
+from model.trans4map import Trans4map    #进入Trans4map找模型架构；在model.yml中写明模型配置
 from model.loss import SemmapLoss
 from metric import averageMeter
 from metric.iou import IoU
