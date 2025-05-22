@@ -42,8 +42,8 @@ class Trans4map(nn.Module):
             self.rnn.bias_hh.data = torch.zeros_like(self.rnn.bias_hh)  # redundant with bias_ih
             self.rnn.bias_ih.data = -noise + 2 * noise * torch.rand_like(self.rnn.bias_ih)
 
-        elif mem_update == 'gru':     #✅。 每个空间格点都用一个 GRUCell 来独立更新其记忆。
-                                      #作者用GRUCell是因为每个空间格点的记忆需要独立地、灵活地按需要更新，而不是简单地按帧序列批量处理（GRU）
+        elif mem_update == 'gru':     #wyh✅。 每个空间格点都用一个 GRUCell 来独立更新其记忆。
+                                      #wyh  作者用GRUCell是因为每个空间格点的记忆需要独立地、灵活地按需要更新，而不是简单地按帧序列批量处理（GRU）
             self.rnn = nn.GRUCell(ego_feat_dim, mem_feat_dim, bias=True)
             self.rnn_r = nn.GRUCell(ego_feat_dim, mem_feat_dim, bias=True)
 
@@ -75,7 +75,7 @@ class Trans4map(nn.Module):
         elif classname.find('BatchNorm') != -1:
             m.weight.data.fill_(1.)
             m.bias.data.fill_(1e-4)
-    #这是Trans4map的核心，负责将每一帧的特征“投影”到地图上，并用GRU方式更新空间记忆。
+    #wyh  这是Trans4map的核心，负责将每一帧的特征“投影”到地图上，并用GRU方式更新空间记忆。
     def memory_update(self, features, proj_indices, masks_inliers):
 
         features = features.float() # torch.Size([1, 20, 64, 120, 160])
@@ -172,7 +172,7 @@ class Trans4map(nn.Module):
         if self.mem_update == 'lstm':
             memory = state[0]
         elif self.mem_update == 'gru':
-            # 拼接正序和反序记忆
+            # wyh  拼接正序和反序记忆
             memory = torch.cat((state, state_r), dim=-1)
         elif self.mem_update == 'replace':
             memory = state
@@ -182,11 +182,11 @@ class Trans4map(nn.Module):
         memory = memory.permute(0, 3, 1, 2) # torch.Size([1, 256, 250, 250])
         memory = self.fuse(memory)
         memory = memory.to(self.device)
-        return memory, observed_masks    #memory：最终的空间记忆特征图；observed_masks：哪些格点被观测到。
+        return memory, observed_masks    #wyh  memory：最终的空间记忆特征图；observed_masks：哪些格点被观测到。
 
     # def forward(self, features, proj_indices, masks_inliers)
     def forward(self, rgb, proj_indices, masks_inliers):
-        #调用**self.encoder**（即Segformer骨干网络），对每一帧RGB图像提取特征。
+        #wyh   调用**self.encoder**（即Segformer骨干网络），对每一帧RGB图像提取特征。
         features = self.encoder(rgb) # torch.Size([1, 20, 3, 480, 640])
         features = features.unsqueeze(0) # torch.Size([1, 20, 64, 120, 160])
         # predictions = F.interpolate(predictions, size=(480,640), mode="bilinear", align_corners=True)
